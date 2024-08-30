@@ -5,40 +5,41 @@ export interface ICard {
     image: string;
     title: string;
     category: string;
-    price: number;
+    price: number | null;
 }
 
 //интерфейс для заказа
 export interface IOrder {
-    payment: string;
+    payment: TOrderPayment;
     email: string;
     phone: string;
     address: string;
-    total: number;
-    items: number | null;
+    items: IModalOrder[];
 }
 
+//интерфейс для модели данных карточек
 export interface ICardsData {
     cards: ICardList[];
     prewiew: string | null;//указатель на картинку через id
-    openModalCard(cardId: string): void;
-    addCard(card: ICard): void;
     deleteCard(cardId: string, payload: Function | null): void;
-    updateCard(card: ICard, payload: Function | null): void;
     getCard(cardId:string): ICard;//ICardList?
 }
 
+//интерфейс для модели данных полученных от пользователя
 export interface IOrderData {
+    item(CardId: number): IModalOrder | null;
+    getBasketPrice(): number;// Получение цены позиций в корзине
+    getItemsLength(): number;//получение колличества позиций в корзине
     getOrderInfo(): IModalOrder[];
     setOrderInfo<T>(orderData: T): void;
     checkValidation( data: Record<keyof Pick<IOrder, "email" | "phone" | "address">, string>): boolean;
 }
 
+export type TOrderPayment = 'cash' | 'card'// для описания возможных способов оплаты заказа
+
 export type ICardList = Omit<ICard, "description">// интерфейс списка карточек для главной страницы
 
-export type IOrderTotal = Pick<IOrder, "items">//интерфейс счетачика корзины
-
-export type IModalOrder = Pick<ICard, "id" |"title" | "price"> & Pick<IOrder, "total">//интерфейс корзины
+export type IModalOrder = Pick<ICard, "id" |"title" | "price">//интерфейс карточки товара в корзине
 
 export type IModalAddress = Pick<IOrder, "payment" | "address">//интерфейс формы оплаты и доставки
 
