@@ -1,46 +1,69 @@
-//интерфейс для карточки
+import { ItemInShop } from '../components/ApplicationState';
+
+// Интерфейс, описывающий поля товара в магазине
 export interface ICard {
-    id: number;
-    description: string;
-    image: string;
-    title: string;
-    category: string;
-    price: number | null;
+  id: string;
+  description: string;
+  image: string;
+  title: string;
+  category: CategoryTypes;
+  price: number | null;
+  selected: boolean;
 }
 
-//интерфейс для заказа
-export interface IOrder {
-    payment: TOrderPayment;
-    email: string;
-    phone: string;
-    address: string;
-    items: IModalOrder[];
+// категории товара
+export type CategoryTypes =
+  | 'другое'
+  | 'софт-скил'
+  | 'дополнительное'
+  | 'кнопка'
+  | 'хард-скил';
+
+export type CategoryKeys = {
+  [Key in CategoryTypes]: string;
+};
+
+export interface ApiResp {
+  items: ICard[];
 }
 
-//интерфейс для модели данных карточек
-export interface ICardsData {
-    cards: ICardList[];
-    prewiew: string | null;//указатель на картинку через id
-    deleteCard(cardId: string, payload: Function | null): void;
-    getCard(cardId:string): ICard;//ICardList?
+// Интерфейс описывающий внутренне состояние приложения
+export interface IAppFeelings {
+  basket: ItemInShop[];// Корзина с товарами
+  store: ItemInShop[];// Массив карточек товара
+  order: IBasketOrder; // Информация о заказе при покупке товара
+  formErrors: ErrorsForm;// Ошибки при заполнении форм
+  addItemToBasket(value: ItemInShop): void;// Метод для добавления товара в корзину
+  deleteItemFromBasket(id: string): void;// Метод для удаления товара из корзины
+  clearBasket(): void;// Метод для полной очистки корзины
+  amount(): number;// Метод для получения количества товаров в корзине
+  getTotalPrice(): number;// Метод для получения суммы цены всех товаров в корзине
+  setItems(): void;// Метод для добавления ID товаров в корзине в поле items для order
+  setBasketOrderField(field: keyof IBasketOrderForm, value: string): void;// Метод для заполнения полей email, phone, address, payment в order
+  validateContactForm(): boolean;// Валидация форм для окошка "контакты"
+  validateOrderForm(): boolean;// Валидация форм для окошка "заказ"
+  clearBasketOrder(): boolean;// Очистить order после покупки товаров
+  changingDataType(items: ICard[]): void;// Метод для превращения данных, полученых с сервера в тип данных приложения
+  clearList(): void;// Метод для обновления поля selected во всех товарах после совершения покупки
 }
 
-//интерфейс для модели данных полученных от пользователя
-export interface IOrderData {
-    item(CardId: number): IModalOrder | null;
-    getBasketPrice(): number;// Получение цены позиций в корзине
-    getItemsLength(): number;//получение колличества позиций в корзине
-    getOrderInfo(): IModalOrder[];
-    setOrderInfo<T>(orderData: T): void;
-    checkValidation( data: Record<keyof Pick<IOrder, "email" | "phone" | "address">, string>): boolean;
+// тип, описывающий ошибки валидации форм
+export type ErrorsForm = Partial<Record<keyof IBasketOrderForm, string>>;
+
+//Интерфейс, описывающий поля заказа товара
+export interface IBasketOrder {
+  items: string[];
+  payment: string;
+  total: number;
+  address: string;
+  email: string;
+  phone: string;
 }
 
-export type TOrderPayment = 'cash' | 'card'// для описания возможных способов оплаты заказа
-
-export type ICardList = Omit<ICard, "description">// интерфейс списка карточек для главной страницы
-
-export type IModalOrder = Pick<ICard, "id" |"title" | "price">//интерфейс карточки товара в корзине
-
-export type IModalAddress = Pick<IOrder, "payment" | "address">//интерфейс формы оплаты и доставки
-
-export type IModalEmail = Pick<IOrder, "email" | "phone">//интерфейс формы почты и телефона
+// Интерфейс, описывающий данные пользователя
+export interface IBasketOrderForm {
+  payment: string;
+  address: string;
+  email: string;
+  phone: string;
+}
